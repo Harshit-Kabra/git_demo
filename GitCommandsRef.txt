@@ -1,0 +1,371 @@
+Git commands -- 
+
+
+
+
+git init    // initialize an existing directory as a Git repository
+
+git clone [url] retrieve an entire repository from a hosted location via URL
+
+git branch   // list your branches. //  a * will appear next to the currently active branch
+
+git branch <abc>   // create a new branch at the current commit… this is not yet in Git. Need to publish separately. 
+
+git checkout <abc>  //switch to another branch and check it out into your working directory
+
+------
+Checkout just doesn’t work with branch.. It also works with below items :
+
+git checkout [commit_hash]  ///switches your working tree and HEAD to the specified commit hash   // commet_hash is nothing but commit id which can be found by using git log.
+
+git checkout [branch_name]
+
+git checkout -b [local_branch_name] [remote_branch_name]   // creates a new local branch named [local_branch_name] from the specified remote branch [remote_branch_name] and switches your working tree and HEAD to the new local branch
+
+git checkout [tag_name]  // switches your working tree and HEAD to the commit associated with the specified tag
+
+git checkout [file_or_directory_path]  // restores the specified file or directory to its state at the last commit
+
+-----
+
+git switch // primary goal of the git switch command is to switch between branches in a repository 
+
+git switch -  // switch to previous branch
+
+git switch -c <branch name> // create new branch and switches to it.
+
+
+Switch vs checkout -- git switch is recommended for branch operations due to improved safety checks, while git checkout is a more robust and versatile tool for file and commit operations.
+The git switch command was specifically designed to switch branches and doesn't handle other operations like working with individual files.
+In contrast, git checkout allows you to switch branches and copy files from any branch to the current one.
+
+-- The Git team now advises users to use:
+ git switch (for branch operations)  +    git restore  (for file restorations)   ==  git checkout (both together)
+
+If you need to switch to specific commits directly, a better choice is git checkout.
+
+git diff     //diff of what is changed but not staged
+--------
+
+3 stages -- 
+Modified 
+Staged
+Commited 
+
+Staging --   Before we make a commit,we must tell Git what files we want to commit(new untracked files, modified files, or deleted files). This is called staging and uses the add command
+
+git add <fileName>]  //// add a file as it looks now to your next commit (stage)
+
+git add --all  OR    git add .     //at the command line prompt in your local project directory to add the files or changes to the repository.
+
+git status        //show modified files in working directory, staged for your next commit
+
+OR 
+
+git diff --staged  /////diff of what is staged but not yet commited
+
+
+----------
+
+//Clearing up things -- if some mess up happened :
+
+git reset --hard //moves local in the state when last commit was happened..  Revert all local changes which happened after that (modified files). 
+
+git clean -f ///  will remove all untracked files..   Which are not staged yet.. Even the ones which are newly created
+
+Before doing git clean… always do -
+git clean -fn    // will show what git clean will do.. But not make any change yet.. Its just a dry run.
+
+To selectively remove untracked  files… do     
+
+git clean -fxdi  // opens interactive mode… to let you select option to be performed on each file. 
+
+
+
+---------
+
+To disregard changes to a file, and not include it in your next commit, unstage the file.
+
+git reset  // unstage all files
+
+git reset <filename> // unstage a particular file. 
+
+git reset --hard [commit]   /// clear staging area, rewrite working tree from specified commit
+
+git stash ///  Save modified and staged changes --- Temporarily store modified, tracked files in order to change branches..    Easy way to stash uncommitted (staged and unstaged) changes without have to make unnecessary commits & I can come back to it anytime later..   Allows to switch to diff branch without worrying about losing my local changes. 
+
+Once you return back to working  branch… restore stashed changed by using -- 
+git stash pop // restore last staged changes from local and clean stash 
+
+git stash apply // it restores changes, without removing anything from stash --- allowing you to apply this on multiple branches. 
+
+
+git stash can be used multiple times and it keep on storing data in a specific order..  To look back on all stashed changes -- do 
+git stash list // also gives you stash number // like a log
+
+Stash number can be used to restore any specific stash from history -- 
+git stash apply <stash@{2}> 
+
+git stash drop<stash@{2}>  // removes from list
+
+git stash clear
+------
+
+Commit -- 
+
+git commit -m '<commit_message>'  //at the command line to commit new files/changes to the local repository.
+--------
+
+
+Push -- 
+
+git push <branch>  //// Transmit local branch commits to the remote repository branch
+
+
+-----
+Git merge --  execute it from main/develop..  Basically the command takes source branch name. 
+
+git merge [alias]/[branch]  ////merge a remote branch into your current branch to bring it up to date.  
+//Takes two commit pointers, usually the branch tips, and will find a common base commit between them. Once Git finds a common base commit it will create a new "merge commit" that combines the changes of each queued merge commit sequence.
+
+Always do git status to confirm merging is happening from correct source to target -- 
+
+Execute git status to ensure that HEAD is pointing to the correct merge-receiving branch.  
+If needed, execute git checkout  to switch to the receiving branch. In our case we will execute git checkout main
+
+*** The current branch will be updated to reflect the merge, but the target branch will be completely unaffected. 
+** just do git checkout to develop or master and then do git merge <feature-branch-name 
+
+Fetch latest remote commits - 
+Make sure the receiving branch and the merging branch are up-to-date with the latest remote changes. Execute git fetch to pull the latest remote commits. Once the fetch is completed ensure the main branch has the latest updates by executing git pull.
+ 
+Fast-forward merge -- when there is linear commit history -- achieved by doing a rebase for each child branch before merging.
+
+If not linear then it will be 3-way merge  OR Recursive merge:   This happens when master/develop branch is modified with some other changes while we requested a merge from feature. Easiest way is to do a rebase and then merge. 
+
+In the event that you require a merge commit during a fast forward merge for record keeping purposes you can execute 
+
+git merge --no-ff <branch>   // This is useful for documenting all merges that occur in your repository.
+
+Resolving conflict :
+If the two branches you're trying to merge both changed the same part of the same file, Git won't be able to figure out which version to use
+When you encounter a merge conflict, running the git status command shows you which files need to be resolved
+
+here is some content not affected by the conflict 
+<<<<<<< main 
+this is conflicted text from main
+ ======= 
+this is conflicted text from feature branch
+ >>>>>>> feature branch;
+
+
+** Generally the content before the ======= marker is the receiving branch and the part after is the merging branch.
+
+Just fix it and put git add , git commit like normal process. 
+
+-- Note that merge conflicts will only occur in the event of a 3-way merge. It’s not possible to have conflicting changes in a fast-forward merge. 
+--------------
+
+git push [branch]   ///Transmit local branch commits to the remote repository branch
+
+git pull   //// fetch and merge any commits from the tracking remote branch
+
+
+
+git log  ///show the commit history for the currently active branch ---- also give commit author name, date and id -- Imp. 
+ OR 
+
+git log --oneline // The main purpose of this command is to print a single commit in a single line as output when the git log command is executed using this option
+
+----------
+
+git config --global --edit           //to update name and email of user in git.
+
+git commit --amend --author="John Doe <john@doe.org>" // In case you want to change just the very last commit
+
+
+git rebase -i <develop>
+
+
+
+You can amend the commit now, with
+
+  git commit --amend 
+
+Once you are satisfied with your changes, run
+
+  git rebase --continue
+
+
+
+-----
+To update previous commits -- 
+
+git rebase -i develop
+
+Press i 
+
+Select action for each commit..   Pick/edit/squash etc.. 
+
+Ecs :wq
+
+
+Command to change….   Amend -->  git commit --amend 
+
+ git rebase --continue
+
+Do this for each commit.. 
+
+Git push -f
+
+----
+
+For last commit message - 
+
+No rebase required… just do git commit --amend
+
+Press i 
+
+Make changes
+
+Ecs :wq
+
+
+Git push -f
+
+-----------
+
+git config --global --edit
+
+-------
+
+git merge  Vs git rebase Vs git squash --> 
+
+Merge :  it just move the changes from one branch to other keeping their commit histories tagged to specific branches. Becomes messier as branches grow and complexity increase.
+
+ReBase : move commit history of one branch at the head of other -- giving one straightforward commit history to maintain
+
+Squash -- merge multiple commits of a branch and keep just one final -- helps in cleaning the branch. 
+
+
+
+
+===================
+
+Git Tags -->
+
+A tag is like a branch that doesn’t change. Unlike branches, tags, after being created, have no further history of commits.
+
+git tag <tagname> // create a new tag
+
+git tag   // list stored tags in a repo
+
+Tagging old commits -
+
+-----
+
+Troubleshooting issues : 
+
+git blame     // only operates on individual files. A file-path is required for any useful output. -- history of commits from different authors on a file. It gives info like author, time stamp, line number, line content
+
+git blame -L 1,5 README.md   // The -L option will restrict the output to the requested line range. Here we have restricted the output to lines 1 through 5.
+
+git blame -C README.md  // The -C option detects lines that were moved or copied from other files. This will report the original author of the lines instead of the last author that moved or copied the lines.
+
+Git blame vs git log. 
+
+
+--------
+
+Forking a Branch :  Server-Side Clone 
+
+This allows the maintainer to accept commits from any developer without giving them write access to the official codebase.
+
+How it works ---  when a new developer wants to start working on the project, they do not directly clone the official repository. 
+Instead of cloning official repository, they fork the official repository to create a copy of it on the server. This new copy serves as their personal public repository—no other developers are allowed to push to it, but they can pull changes from it. 
+
+After they have created their server-side copy, the developer performs a git clone to get a copy of it onto their local machine. 
+
+When they're ready to publish a local commit, they push the commit to their own public repository—not the official one. Then, they file a pull request with the main repository, which lets the project maintainer know that an update is ready to be integrated. 
+
+Steps -- 
+
+fork official Repo --> server-side copy is cloned --> create feature branch --> make changes -- commits -- push changes to server side copy --> create PR to official Repo -- Merge PR.
+
+HOW -- There is no unique Git command to create forked repositories. A clone operation is essentially a copy of a repository and its history. 
+
+Fork can be done from UI  of Git hub or any other 3rd party tools like Bit Bucket etc… once forked -- give a name to repo and create your own repo from original master. 
+Clone this repo now and start working. 
+
+Basically.. Clone creates a copy on local VS Fork creates a copy on Server (an additional repo). 
+
+---------------
+
+
+Undoing Commits & Changes : 
+
+Git has its own nomenclature for 'undo' operations that it is best to leverage in a discussion. This nomenclature includes terms like reset, revert, checkout, clean, and more.
+
+A fun metaphor is to think -
+ Git as a timeline management utility.
+Commits are snapshots of a point in time from project's history.
+
+When 'undoing' in Git, you are usually moving back in time, or to another timeline where mistakes didn't happen
+
+
+git log   // to see commit ids and details. Each commit has a unique SHA-1 identifying hash.
+
+It is entirely possible that the commit you're looking for is on another branch. You can view all commits across all branches by executing 
+
+git log--branches=*
+
+git checkout  //is an easy way to “load” any of these saved snapshots onto your development machine.
+
+Checking out an old file does not move the HEAD pointer. It remains on the same branch and same commit, avoiding a 'detached head' state.
+ You can then commit the old version of the file in a new snapshot as you would any other changes.
+
+So, in effect, this usage of git checkout on a file, serves as a way to revert back to an old version of an individual file.
+
+During the normal course of development, the HEAD usually points to main or some other local branch, but when you check out a previous commit, HEAD no longer points to a branch—it points directly to a commit. This is called a “detached HEAD” state, and it can be visualized as the following. 
+
+Basically doing git checkout on a commit instead of a branch… takes you to files modified with that commit but still keep HEAD on branch (avoiding detached Head) -- which is very helpful to move back changes to branch for a specific file.
+
+
+Now if we just want to continue with this state.. We have a copy of changes before messed up commit.
+But what if there were some good commits which we want to keep and just ignore this one specific commit --
+
+How to undo a commit with git checkout -- 
+
+git revert HEAD     // Git will create a new commit with the inverse of the last commit
+
+Then push and merge.
+
+This solution is a satisfactory undo. This is the ideal 'undo' method for working with public shared repositories. If you have requirements of keeping a curated and minimal Git history this strategy may not be satisfactory.
+
+How to undo a commit with git reset --
+
+git reset --hard a1e8fb5 // the commit history is reset to that specified commit
+
+This method of undoing changes has the cleanest effect on history. Doing a reset is great for local changes however it adds complications when working with a shared remote repository. If we have a shared remote repository that has the 872fa7e commit pushed to it, and we try to git push a branch where we have reset the history, Git will catch this and throw an error. Git will assume that the branch being pushed is not up to date because of it's missing commits.
+
+Undoing the last commit --
+
+git commit --amend
+
+
+Example -- 
+
+git log 'test file.txt'
+
+git revert -m 1 f7e973f5f17113d191535c580fe72e9e7e9b1849
+
+
+--resolve conflict :   accept combination - complete merge.
+
+Commit and push changes directly in branch…. Or create a separate branch and raise PR.
+
+Use git push -f here because git doesn’t allow modifying git commit history until done by force. 
+
+
+// Git reset will delete the commit completely -- but this is only useful if no body else is using the repo.
+//if working in a team -- use git revert… which will keep the previous commit in history but does the work of reverting changes.
