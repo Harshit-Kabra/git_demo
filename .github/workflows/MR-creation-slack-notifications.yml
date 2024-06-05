@@ -1,0 +1,17 @@
+name: MR creation slack notification
+
+on:
+  pull_request:
+    - opened
+    - reopened
+
+jobs:
+  notify:
+    name: MR creation notification
+    steps:
+      - name: Post message
+        uses: https://github.aexp.com/amex-eng/MForce-SlackTest/.github/workflows/.slack-notification.yml    #To update path with slack-notification.yml in repo directory.
+    with:
+      workflow-event: ${{ toJson(github.event.pull_request) }}
+    secrets:
+      slackWebhookUrl: https://hooks.slack.com/services/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    # Pull it from secrets.    ${{ secrets.SLACK_DEPLOYMENT_WEBHOOK_URL }}
