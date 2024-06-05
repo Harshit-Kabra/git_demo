@@ -1,0 +1,28 @@
+name: Slack notification workflow
+
+on:
+  workflow_call:
+    inputs:
+      workflow-event:
+        required: true
+        type: string
+    secrets:
+      slackWebhookUrl:
+        required: true
+
+jobs:
+  notify:
+    name: Slack notification
+    runs-on: [ubuntu-latest]
+    steps:
+      - name: Post message
+        uses: slackapi/slack-github-action@v1.25.0  #To Add GitHub actions to use for this job
+        env:
+          SLACK_WEBHOOK_URL: ${{ toJson(fromJson(secrets.slackWebhookUrl) }}   # Webhook url configured with the channel. Pull it from GitHub Secret 
+        with:
+          payload: |
+            {
+              "title": ${{ toJson(fromJson(inputs.workflow-event).title) }},
+              "author": ${{ toJson(fromJson(inputs.workflow-event).user.login) }},
+              "link": ${{ toJson(fromJson(inputs.workflow-event).html_url) }}
+            }
